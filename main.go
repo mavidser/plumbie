@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/plumbie/plumbie/config"
 	"github.com/plumbie/plumbie/models"
+	"github.com/plumbie/plumbie/plugins"
 	"github.com/plumbie/plumbie/webserver"
 
 	log "github.com/sirupsen/logrus"
@@ -23,6 +24,9 @@ func main() {
 	}
 
 	if err := models.Initialize(); err != nil {
+		log.Panic(err)
+	}
+	if err := plugins.Load(); err != nil {
 		log.Panic(err)
 	}
 	webserver.Start()

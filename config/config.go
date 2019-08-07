@@ -24,6 +24,10 @@ var Database struct {
 	SSL      bool
 }
 
+var Plugins struct {
+	Path string
+}
+
 func init() {
 	viper.SetDefault("debug", false)
 
@@ -54,6 +58,9 @@ func LoadConfig() error {
 		return err
 	}
 	if err := loadDatabaseConfig(); err != nil {
+		return err
+	}
+	if err := loadPluginsConfig(); err != nil {
 		return err
 	}
 	return nil
@@ -89,5 +96,11 @@ func loadDatabaseConfig() error {
 	if Database.Charset != "utf8" && Database.Charset != "utf8mb4" {
 		return fmt.Errorf("Unsupported database charset: %s. Please use utf8 or utf8mb4", Database.Charset)
 	}
+	return nil
+}
+
+func loadPluginsConfig() error {
+	Plugins.Path = viper.GetString("plugins.path")
+	fmt.Println("path", Plugins.Path)
 	return nil
 }
