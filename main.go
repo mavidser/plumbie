@@ -9,7 +9,9 @@ import (
 )
 
 func main() {
-	config.LoadConfig()
+	if err := config.LoadConfig(); err != nil {
+		log.Panic(err)
+	}
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,

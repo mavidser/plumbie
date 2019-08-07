@@ -83,10 +83,10 @@ func loadDatabaseConfig() error {
 	if Database.Driver != "mysql" {
 		return fmt.Errorf("Unsupported database: %s", Database.Driver)
 	}
-	if Database.Driver != "tcp" || Database.Driver != "unix" {
-		return fmt.Errorf("Unsupported protocol: %s. Only tcp and unix are supported.", Database.Driver)
+	if Database.Protocol != "tcp" && Database.Protocol != "unix" {
+		return fmt.Errorf("Unsupported protocol: %s. Only tcp and unix are supported.", Database.Protocol)
 	}
-	if Database.Charset != "utf8" || Database.Charset != "utf8mb4" {
+	if Database.Charset != "utf8" && Database.Charset != "utf8mb4" {
 		return fmt.Errorf("Unsupported database charset: %s. Please use utf8 or utf8mb4", Database.Charset)
 	}
 	return nil
