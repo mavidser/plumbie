@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -14,14 +15,11 @@ var Web struct {
 }
 
 var Database struct {
-	Driver   string
 	Host     string
-	Protocol string
+	Port     int
 	Name     string
 	User     string
 	Password string
-	Charset  string
-	SSL      bool
 }
 
 var Plugins struct {
@@ -34,18 +32,20 @@ func init() {
 	viper.SetDefault("web.port", 8080)
 	viper.SetDefault("web.bind_ip", "0.0.0.0")
 
-	viper.SetDefault("database.driver", "mysql")
 	viper.SetDefault("database.host", "127.0.0.1")
-	viper.SetDefault("database.protocol", "tcp")
+	viper.SetDefault("database.port", 5432)
 	viper.SetDefault("database.name", "plumbie")
 	viper.SetDefault("database.user", "plumbie")
 	viper.SetDefault("database.password", "")
-	viper.SetDefault("database.charset", "utf8")
-	viper.SetDefault("database.ssl", false)
 }
 
 func LoadConfig() error {
-	viper.SetConfigFile("./config.toml")
+	configPath := "./config.toml"
+	args := os.Args[1:]
+	if len(args) > 0 {
+		configPath = args[0]
+	}
+	viper.SetConfigFile(configPath)
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
@@ -78,24 +78,11 @@ func loadWebConfig() error {
 }
 
 func loadDatabaseConfig() error {
-	Database.Driver = viper.GetString("database.driver")
 	Database.Host = viper.GetString("database.host")
-	Database.Protocol = viper.GetString("database.protocol")
+	Database.Port = viper.GetInt("database.port")
 	Database.Name = viper.GetString("database.name")
 	Database.User = viper.GetString("database.user")
 	Database.Password = viper.GetString("database.password")
-	Database.Charset = viper.GetString("database.charset")
-	Database.SSL = viper.GetBool("database.ssl")
-
-	if Database.Driver != "mysql" {
-		return fmt.Errorf("Unsupported database: %s", Database.Driver)
-	}
-	if Database.Protocol != "tcp" && Database.Protocol != "unix" {
-		return fmt.Errorf("Unsupported protocol: %s. Only tcp and unix are supported.", Database.Protocol)
-	}
-	if Database.Charset != "utf8" && Database.Charset != "utf8mb4" {
-		return fmt.Errorf("Unsupported database charset: %s. Please use utf8 or utf8mb4", Database.Charset)
-	}
 	return nil
 }
 

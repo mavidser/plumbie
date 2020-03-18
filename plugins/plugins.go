@@ -7,9 +7,12 @@ import (
 	"plugin"
 
 	"github.com/plumbie/plumbie/config"
+	"github.com/plumbie/plumbie/sdk"
 
 	log "github.com/sirupsen/logrus"
 )
+
+var Apps []sdk.Application
 
 func Load() error {
 	var files []string
@@ -26,6 +29,8 @@ func Load() error {
 		return err
 	}
 
+	Apps = []sdk.Application{}
+
 	for _, file := range files {
 		plug, err := plugin.Open(file)
 		if err != nil {
@@ -33,11 +38,18 @@ func Load() error {
 		}
 		log.Debugf("plugins: Plugin loaded: %s", file)
 
-		application, err := plug.Lookup("Application")
+		symApplication, err := plug.Lookup("Application")
 		if err != nil {
 			return err
 		}
+
+		application, ok := symApplication.(sdk.Application)
+		if !ok {
+			log.Errorf("plugins: Application %s is not of type sdk.Application", symApplication)
+		}
+
 		log.Debugf("plugins: Application symbol loaded: %s", application)
+		Apps = append(Apps, application)
 	}
 	return nil
 }

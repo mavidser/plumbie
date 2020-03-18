@@ -12,10 +12,19 @@ var (
 	usernamePattern = "^[a-z][a-z0-9_]*$"
 )
 
+const UserSchema = `
+CREATE TABLE user_acc (
+  id serial,
+  username varchar(255) UNIQUE NOT NULL,
+  password varchar(255) NOT NULL,
+  PRIMARY KEY (id)
+);
+`
+
 type User struct {
-	ID       int64  `xorm:"id pk autoincr"`
-	Username string `xorm:"UNIQUE NOT NULL"`
-	Password string `xorm:"NOT NULL"`
+	ID       int
+	Username string
+	Password string
 }
 
 func (u *User) hashPassword() error {
@@ -37,19 +46,12 @@ func (u *User) validateUsername() error {
 }
 
 func (u *User) Create() error {
-	sess := x.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
 	u.validateUsername()
 	u.hashPassword()
 
-	if _, err := sess.Insert(u); err != nil {
-		return err
-	}
-	return sess.Commit()
+	stmt := "INSERT INTO user_acc (username, password) VALUES (:username, :password)"
+	_, err := db.NamedExec(stmt, u)
+	return err
 }
 
 func (u *User) verifyPassword(password string) error {
@@ -57,16 +59,11 @@ func (u *User) verifyPassword(password string) error {
 }
 
 func UserLogin(username string, password string) (*User, error) {
-	user := User{
-		Username: strings.ToLower(username),
-	}
+	user := User{}
 
-	hasUser, err := x.Get(&user)
+	err := db.Get(&user, "SELECT * from user_acc WHERE username = $1", username)
 	if err != nil {
 		return nil, err
-	}
-	if !hasUser {
-		return nil, fmt.Errorf("User doesn't exist")
 	}
 
 	if err := user.verifyPassword(password); err != nil {

@@ -11,6 +11,8 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-xorm/xorm v0.7.5
 	github.com/gorilla/mux v1.7.3
+	github.com/jmoiron/sqlx v1.2.0
+	github.com/lib/pq v1.0.0
 	github.com/pelletier/go-toml v1.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.4.0

@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"fmt"
-
 	"github.com/plumbie/plumbie/models"
 
 	"github.com/go-macaron/session"
@@ -15,17 +13,16 @@ type LoginForm struct {
 }
 
 func Login(ctx *macaron.Context, form LoginForm, sess session.Store) {
-	fmt.Println("XXX")
 	if user, err := models.UserLogin(form.Username, form.Password); err != nil {
-		ctx.JSON(200, map[string]interface{}{
+		ctx.JSON(400, map[string]interface{}{
 			"ok":    false,
 			"error": err.Error(),
 		})
 	} else {
-		sess.Set("userid", user.ID)
+		sess.Set(0, 0) // hack to get around a macaron session bug https://github.com/go-macaron/session/issues/30
+		sess.Set("userID", user.ID)
 		ctx.JSON(200, map[string]interface{}{
-			"ok":   true,
-			"user": user,
+			"ok": true,
 		})
 	}
 }
@@ -41,7 +38,7 @@ func SignUp(ctx *macaron.Context, form SignUpForm) {
 		Password: form.Password,
 	}
 	if err := user.Create(); err != nil {
-		ctx.JSON(200, map[string]interface{}{
+		ctx.JSON(400, map[string]interface{}{
 			"ok":    false,
 			"error": err.Error(),
 		})
@@ -53,11 +50,9 @@ func SignUp(ctx *macaron.Context, form SignUpForm) {
 }
 
 func Logout(ctx *macaron.Context, sess session.Store) {
-	// err := sess.Destory(ctx)
-	fmt.Println(sess.Get("userid").(int64))
-	err := sess.Delete("userid")
+	err := sess.Delete("userID")
 	if err != nil {
-		ctx.JSON(200, map[string]interface{}{
+		ctx.JSON(400, map[string]interface{}{
 			"ok":    false,
 			"error": err.Error(),
 		})

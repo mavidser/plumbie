@@ -9,7 +9,7 @@ import (
   "syscall"
   "time"
 
-  _ "github.com/go-macaron/session/mysql"
+  _ "github.com/go-macaron/session/postgres"
   "github.com/plumbie/plumbie/config"
   "github.com/plumbie/plumbie/models"
   apiv1 "github.com/plumbie/plumbie/webserver/api/v1"
@@ -29,8 +29,8 @@ func getHTTPServer() (s *http.Server) {
   m.Use(macaron.Renderer())
   m.Use(session.Sessioner(session.Options{
     // Provider:   "memory",
-    Provider:       config.Database.Driver,
-    ProviderConfig: models.Connection,
+    Provider:       models.Driver,
+    ProviderConfig: models.ConnectionStr,
     CookieName:     "Session",
   }))
 
