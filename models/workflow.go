@@ -12,14 +12,14 @@ CREATE TABLE workflow (
   user_id integer NOT NULL REFERENCES user_acc,
   name varchar NOT NULL,
   trigger_app varchar NOT NULL,
-  trigger_action varchar NOT NULL,
+  trigger varchar NOT NULL,
   PRIMARY KEY (id)
 );
 `
 
 const WorkflowStructViewSchema = `
 CREATE VIEW workflow_step as
-SELECT id, user_id, name, trigger_app, trigger_action, (
+SELECT id, user_id, name, trigger_app, trigger, (
   SELECT array_to_json(array_agg(to_json(row)))
   FROM (
     SELECT *
@@ -31,12 +31,12 @@ FROM workflow;
 `
 
 type Workflow struct {
-	ID            int     `json:"id"`
-	UserID        int     `json:"user_id"`
-	Name          string  `json:"name"`
-	TriggerApp    string  `json:"trigger_app"`
-	TriggerAction string  `json:"trigger_action"`
-	Steps         []*Step `json:"steps,omitempty"`
+	ID         int     `json:"id"`
+	UserID     int     `json:"user_id"`
+	Name       string  `json:"name"`
+	TriggerApp string  `json:"trigger_app"`
+	Trigger    string  `json:"trigger"`
+	Steps      []*Step `json:"steps,omitempty"`
 }
 
 const StepSchema = `
@@ -136,8 +136,8 @@ func GetWorkflow(workflowID int, userID int) (*Workflow, error) {
 
 func NewWorkflow(workflow *Workflow) (int, error) {
 	stmt := `
-	INSERT INTO workflow (user_id, name, trigger_app, trigger_action)
-	VALUES (:user_id, :name, :trigger_app, :trigger_action)
+	INSERT INTO workflow (user_id, name, trigger_app, trigger)
+	VALUES (:user_id, :name, :trigger_app, :trigger)
 	RETURNING id;
 	`
 	namedStmt, err := db.PrepareNamed(stmt)

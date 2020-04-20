@@ -13,9 +13,9 @@ import (
 )
 
 type NewWorkflowForm struct {
-	Name          string `binding:"Required" form:"name"`
-	TriggerApp    string `binding:"Required" form:"trigger_app"`
-	TriggerAction string `binding:"Required" form:"trigger_action"`
+	Name       string `binding:"Required" form:"name"`
+	TriggerApp string `binding:"Required" form:"trigger_app"`
+	Trigger    string `binding:"Required" form:"trigger"`
 }
 
 type UpdateWorkflowForm struct {
@@ -85,12 +85,12 @@ func NewWorkflow(ctx *macaron.Context, form NewWorkflowForm, sess session.Store)
 	}
 
 	workflow := models.Workflow{
-		UserID:        userID,
-		Name:          form.Name,
-		TriggerApp:    form.TriggerApp,
-		TriggerAction: form.TriggerAction,
+		UserID:     userID,
+		Name:       form.Name,
+		TriggerApp: form.TriggerApp,
+		Trigger:    form.Trigger,
 	}
-	if apps.TriggerExists(workflow.TriggerApp, workflow.TriggerAction) {
+	if apps.TriggerExists(workflow.TriggerApp, workflow.Trigger) {
 		id, err := models.NewWorkflow(&workflow)
 		if err != nil {
 			ctx.JSON(400, err.Error())
